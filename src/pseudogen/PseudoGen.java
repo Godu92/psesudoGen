@@ -37,36 +37,105 @@ import java.util.ArrayList;
 public class PseudoGen {
 
     public String message = null;
+    public final static int MAX = 10, DELAYNEW = 100, DELAYFULL = 1000;
+    public static boolean bstop;
+
+    public void stop(){
+        PseudoGen.bstop = true;
+    }
+    public void active(){
+        return !PseudoGen.bstop;
+    }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-
-
-
         Base base = new GetCommand();
         base.commandLine(args);
 
         String format = base.getFormat();
-        File template = base.getTemplate();
         File target = base.getTarget();
         File arrayDir = base.getArrayDir();
         ArrayList<String> arrayFiles = base.getArrayFiles();
         boolean verbose = base.getVerbose();
-
-        base = new GenMap();
-        base.makeMap(arrayDir, arrayFiles, verbose);
-
-        if (format.equals("text")) {
+        Map<String, List<String>> map = base.getMap();
+        int maxFiles = base.getMax();
+        boolean end = base.getEnd();
+        
+        PseudoGen gen = new PseudoGen();
+        
+        if(end == false){
+            print("Starting. Monitoring directory: " + target);
+            String f = String.format("%5d"m maxFiles).replace(' ', '-');
+            print("Maintaining: [" + f + "] file(s) in \"" + target + "\"");
+            
+            Thread interupt = new Thread("User Input"){
+                public void run(){
+                    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+                    try{
+                        br.readLine();
+                    }catch(IOException e){
+                        error("Error in user interupt", e);
+                    }
+                    gen.stop();
+                }
+            };
+            interupt.start();
+            
+            print("Press enter to stop");
+        }else if (end == true){
+            String f = String.format("%5d"m maxFiles).replace(' ', '-');
+            print("Creating: [" + f + "] file(s) in \"" + target + "\"");
+        }
+        
+        int filecount = 0;
+        File template = base.getTemplate();
+        int delayFull = base.getFull();
+        int delayNew = base.getNew();
+        
+        try{
+            while(gen.active()){
+                int Count = base.countFiles(target, format);
+                if(filecount <= maxFiles && end == true){
+                    if (format.equals("text")) {
             base = new GenTxt();
             base.create(template, verbose, map, target, format, base);
         } else if (format.equals("doc")) {
             //base = new GenDoc();
             //base.create();
         }
-
-        base.print("\nEnd of program");
+        if(filecount == maxFiles){
+            print("File max reached, program terminating");
+            String f = String.format("%5d"m maxFiles).replace(' ', '-');
+            print("[" + f + "] file(s) created");
+            System.exit(1);
+        }
+            }else if (Count < maxFiles){
+                if(filecount <= maxFiles && end == true){
+                    if (format.equals("text")) {
+            base = new GenTxt();
+            base.create(template, verbose, map, target, format, base);
+        } else if (format.equals("doc")) {
+            //base = new GenDoc();
+            //base.create();
+        }
+        Thread.sleep(delayNew);
+            }else{
+               Thread.sleep(delayFull); 
+            }
+            
+        }
+            }
+        }catch(InteruptedException ex){
+            System.exit(1);
+        }catch(IOException e){
+            error("", e);
+        }
+        
+        print("User initiated stop, program terminating");
+            String f = String.format("%5d"m maxFiles).replace(' ', '-');
+            print("[" + f + "] file(s) created");
     }
 
     public void print(String text) {
