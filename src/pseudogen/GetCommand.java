@@ -18,13 +18,16 @@ public class GetCommand extends Base {
     private File template = null, arrayDir = null, target = null;
     String format = null;
     private boolean verbose = false;
-    private final ArrayList<String> arrayFiles = new ArrayList<>();
+    private final List<String> arrayFiles = new ArrayList<>();
 
     @Override
     public void commandLine(String[] args) {
         int i = 0;
 
         String debug = Arrays.toString(args);
+        
+        //if args.length < minimum args to run, print usage doc and exit
+        
         if (debug.contains("-verbose")) {
             verbose = true;
             print("Printing verbose statements");
@@ -64,33 +67,50 @@ public class GetCommand extends Base {
         while (i < args.length) {
             String test = args[i];
             if (test.equalsIgnoreCase("-arrayDir")) {
+                if (i < args.length){
                 test = args[++i];
                 arrayDir = new File(test);
                 if (!(arrayDir.isDirectory())) {
-                    message = "Argument: " + args[i] + " is not a directory";
+                    message = "Argument: " + test + " is not a directory";
                     error(message);
                 } else if (verbose == true) {
                     print("Array directory read in");
                 }
+                }else{
+                    print("-arayDir requires directory path");
+                }
             } else if (test.equalsIgnoreCase("-arrays")) {
                 int start = i;
-                while (!(test.contains("-")) && i < args.length) {
-                    File arrayFile = new File(test);
-                    if (arrayFile.isFile()) {
-                        arrayFiles.add(test);
-                        if (verbose == true) {
-                            print("Array files read in");
-                        }
+                while ( i < args.length) {
+                    test = args[++i];
+                    do{
+                    File file = new File(test)
+                    if (file.isFile()) {
+                        GetCommand.getArrayFile().add(test);
+                        
                     } else {
                         message = "Argument: " + args[i] + " is not a file";
                         error(message);
                     }
-                    i++;
-                }
+                    
+                    if(i<(args.length - 1)){
+                        test = args[++i];
+                    }else{
+                        break;
+                    }
+                    } while(!(test.contains("-")));
+                    
                 i = start;
+            }else{
+                message = "-arrays requires at least one file";
+                error(message, null);
             }
             i++;
         }
+        if (verbose == true) {
+            print("Command line processed");
+        }
+        return;
     }
 
     @Override
