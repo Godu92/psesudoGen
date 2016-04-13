@@ -16,15 +16,22 @@ import java.util.Arrays;
 public class GetCommand extends Base {
 
     private File template = null, arrayDir = null, target = null;
+    int maxFiles = PseudoGen.MAX, delayNew  = PseudoGen.DELAYNEW, delayFull = PseudoGen.DELAYFULL;
     String format = null;
-    private boolean verbose = false;
+    private boolean verbose = false, end = false, stop = false;
     private final List<String> arrayFiles = new ArrayList<>();
 
     @Override
     public void commandLine(String[] args) {
         int i = 0;
 
-        String debug = Arrays.toString(args);
+        if(ars.length < 7 || args == null){
+            usagePrint();
+            stop = true;
+            return;
+        }
+        
+        String debug = Arrays.toString(args).toLowerCase();
         
         //if args.length < minimum args to run, print usage doc and exit
         
@@ -105,12 +112,28 @@ public class GetCommand extends Base {
                 message = "-arrays requires at least one file";
                 error(message, null);
             }
+            }else if(test.equals("-max")){
+                test = args[++i];
+                maxFiles = Integer.parseInt(test);
+            }else if(test.equals("-new")){
+                test = args[++i];
+                delayNew = Integer.parseInt(test);
+            }else if(test.equals("-full")){
+                test = args[++i];
+                delayFull = Integer.parseInt(test);
+            }else if(test.equals("-stop")){
+                end = true;
+            }
             i++;
         }
         if (verbose == true) {
             print("Command line processed");
         }
         return;
+    }
+    
+    static void usagePrint(){
+        print("Usage documentation");
     }
 
     @Override
@@ -141,5 +164,21 @@ public class GetCommand extends Base {
     @Override
     boolean getVerbose() {
         return verbose;
+    }
+    
+    int getMax(){
+        return maxFiles;
+    }
+    int getNew(){
+        return delayNew;
+    }
+    int getFull(){
+        return delayFull;
+    }
+    boolean getEnd(){
+        return end;
+    }
+    boolean getStop(){
+        return stop;
     }
 }
