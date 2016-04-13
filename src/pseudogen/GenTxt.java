@@ -15,16 +15,16 @@ public class GenTxt extends Base {
 
     @Override
     public void create() {
-        createTemp();
+        File input = createTemp();
 
-        File template = null;
-        writeTemp(template);
+        File out = getTargetFile();
 
         format();
     }
 
     private void format() {
-        message = "Not supported yet.";
+        //parser into expected format
+        message = "Format parser not supported yet.";
         error(message, null);
     }
 }
