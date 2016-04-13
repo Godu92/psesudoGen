@@ -43,6 +43,8 @@ public class PseudoGen {
      */
     public static void main(String[] args) {
 
+
+
         Base base = new GetCommand();
         base.commandLine(args);
 
@@ -54,11 +56,11 @@ public class PseudoGen {
         boolean verbose = base.getVerbose();
 
         base = new GenMap();
-        base.makeMap(arrayDir, arrayFiles);
+        base.makeMap(arrayDir, arrayFiles, verbose);
 
         if (format.equals("text")) {
             base = new GenTxt();
-            base.create();
+            base.create(template, verbose, map, target, format, base);
         } else if (format.equals("doc")) {
             //base = new GenDoc();
             //base.create();
