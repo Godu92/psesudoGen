@@ -18,19 +18,46 @@ public class Base extends PseudoGen {
 
     Base base;
 
-    public void createTemp() {
-        try {
-            Files.createTempFile("TempFile", ".txt");
-        } catch (IOException ex) {
-            message = "Error creating temp file";
-            error(message, ex);
+    public void createTemp(String template, boolean verbose, String format) {
+        File sample = new File(template);
+        
+        Date now = new Date();
+        String strValue = null;
+        if(format.equals("text")){
+            strValue = "---" + "Date: " + getDate(now) + "   " + "Time: " + getTime(now) + "---";
+        }else if(format.equals("doc")){
+            strValue = getDate(now) + " " + getTime(noW);
         }
+        
+        InputStream is = new FileInputStream(sample);
+        byte[] data = new bayte[(int) sample.length()];
+        is.read(data);
+        
+        String str = new String(data, "UTF-8");
+        is.close();
+        
+        List<Integer> count;
+        List<String> set = new ArrayList<String>(map.keySet());
+        
+        count = GenMap.calcArrays(set, verbose);
+        
+        File temp = writeTemp(str, strValue, format);
+        
+        sample = temp;
+        sample.deleteOnExit();
+        return sample;
     }
 
-    public void writeTemp(File template) {
-        base = new GenMap();
-
-        base.searchAndReplace(template);
+    public void writeTemp(String str, String strValue, String format) {
+        File out = File.createTempFile("Temp", ".txt");
+        
+        FileWriter fw = new FileWriter (out);
+        
+        String newtext= GenMap.searchAndReplace(str, strValue);
+        
+        fw.write(newtext + "\n");
+        fw.close();
+        return out;
     }
 
     public void commandLine(String[] args) {
