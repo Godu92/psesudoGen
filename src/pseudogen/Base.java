@@ -17,8 +17,51 @@ import java.util.ArrayList;
 public class Base extends PseudoGen {
 
     Base base;
+    String dateFormat = "yyyyMMdd", timeFormat = "HH:mm:ss:SSS";
+    SimpleDateFormat sdfDate = new SimpleDateFormat(dateFormat), sdfTime = new SimpleDataFormat(timeFormat);
+    
+    public static String getDate(Date now){
+        String timeStamp = sdfDate.format(now);
+        return timeStamp;
+    }
+    public static String getTime(Date now){
+        String timeStamp = sdfTime.format(now);
+        return timeStamp;
+    }
+    
+    public static String randString(int num){
+        String str = "";
+        for(int i = 0, i < num; i++){
+            int ch = (int) (Math.random() * ('Z' - 'A' + 1)) + A;
+            str += (char) ch;
+        }
+        return str;
+    }
+    
+    public int countFiles(File target, String format){
+        List<Files> files;
+        DirectoryStream<Path> stream;
+        
+        if(format.equals("text")){
+            stream = Files.newDirectoryStream(target.toPath(), "*.txt");
+        }else if(format.equals("doc")){
+            stream = Files.newDirectoryStream(target.toPath(), "*.doc");
+        }else{
+            stream = null;
+        }
+        
+        try{
+            for(Path file : stream){
+                files.add(file.toFile());
+            }
+        }finally{
+            stream.close();
+        }
+        
+        return files.szie();
+    }
 
-    public void createTemp(String template, boolean verbose, String format) {
+    public void createTemp(String template, boolean verbose, String format, int filecount, Map<String, List<String>> map) {
         File sample = new File(template);
         
         Date now = new Date();
@@ -39,21 +82,40 @@ public class Base extends PseudoGen {
         List<Integer> count;
         List<String> set = new ArrayList<String>(map.keySet());
         
-        count = GenMap.calcArrays(set, verbose);
+        count = GenMap.calcArrays(set, verbose, filecount, map);
         
-        File temp = writeTemp(str, strValue, format);
+        File temp = writeTemp(str, strValue, format, count, map);
         
         sample = temp;
         sample.deleteOnExit();
         return sample;
     }
 
-    public void writeTemp(String str, String strValue, String format) {
+    public File getNextFile(File target, AtomicLong indexCount, String format){
+    File next;
+    
+    do{
+        long index = indexCount.incrementAndGet();
+        
+        String filename;
+        if(format.equals("text"){
+            filename = "Target_" + String.format("%06f", index) + ".txt";
+        }else  if(format.equals("doc"){
+            filename = "Target_" + String.format("%06f", index) + ".doc";
+        }
+        
+        next = new File(target, filename);
+    }while (next.exists());
+    
+    return next;
+}
+
+    public void writeTemp(String str, String strValue, String format, List<Integer> count, Map<String, List<String>> map) {
         File out = File.createTempFile("Temp", ".txt");
         
         FileWriter fw = new FileWriter (out);
         
-        String newtext= GenMap.searchAndReplace(str, strValue);
+        String newtext= GenMap.searchAndReplace(str, strValue, count, map);
         
         fw.write(newtext + "\n");
         fw.close();
