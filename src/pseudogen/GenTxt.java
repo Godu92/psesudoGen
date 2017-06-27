@@ -6,25 +6,31 @@
 package pseudogen;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  *
  * @author Godu92
  */
 public class GenTxt extends Base {
-
-    @Override
-    public void create() {
-        File input = createTemp();
-
-        File out = getTargetFile();
-
-        format();
-    }
-
-    private void format() {
-        //parser into expected format
-        message = "Format parser not supported yet.";
-        error(message, null);
-    }
+	
+	@Override
+	public void create() {
+		try {
+			createTemp(null, false, null, 0, null);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		File out = getTarget();
+		
+		format();
+	}
+	
+	private void format() {
+		// parser into expected format
+		message = "Format parser not supported yet.";
+		error(message, null);
+	}
 }
